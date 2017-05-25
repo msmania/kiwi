@@ -4,6 +4,8 @@ def App(app, request):
   mapping = [
     CustomMap(hint='/start',
               path='1567_14913.html'),
+    CustomMap(hint='/hello-world.css?type=custom',
+              mimetype='application/custom'),
     CustomMap(hint='/go?to=spain',
               status=302,
               location='http://www.spain.info/en_US/'),

@@ -5,19 +5,19 @@ from kiwi.sites import search_contents_dir
 
 def test_search_contents_dir():
   verify_fullpath = lambda result, filename: \
-    os.path.basename(result.path) == filename
+    os.path.basename(result) == filename
 
   # any item matches
   result = search_contents_dir('contents/hello', '/')
-  assert(type(result.path) == str)
+  assert(type(result) == str)
   result = search_contents_dir('contents/hello', '')
-  assert(type(result.path) == str)
+  assert(type(result) == str)
 
   # 404
   result = search_contents_dir('contents/hello', 'no-slash')
-  assert(result.get_status_code() == 404)
+  assert(result == None)
   result = search_contents_dir('contents/hello', '/fakeroot')
-  assert(result.get_status_code() == 404)
+  assert(result == None)
 
   # hello.htm: hello.html > hello.json > hello-world.htm
   result = search_contents_dir('contents/hello', '/hello.htm')

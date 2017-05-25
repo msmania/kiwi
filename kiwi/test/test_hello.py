@@ -30,6 +30,12 @@ def test_hello_json(client):
   assert(resp3.content_type == 'text/css')
   assert(resp.data == resp3.data)
 
+  # Use CustomMap without suggesting the `path`
+  resp4 = client.get('/hello/hello-world.css?type=custom')
+  assert(resp4.status_code == 200)
+  assert(resp4.content_type == 'application/custom')
+  assert(resp.data == resp4.data)
+
   # Invalid filename --> 404
   resp = client.get('/hello/goodbye')
   assert(resp.status_code == 404)

@@ -13,6 +13,9 @@ class CustomMap:
     self.status = status
     self.location = location
 
+  def has_path(self):
+    return type(self.path) == str
+
   def has_type(self):
     return type(self.type) == str
 
@@ -63,13 +66,13 @@ class ContentMatcher:
   def __init__(self, target_url_path):
     self.scorer = ContentMatcher.FileScorer(target_url_path)
     self.score = 0
-    self.candidate = CustomMap(status=404)
+    self.candidate = None
 
   def put_candidate(self, root, filename):
     new_score = self.scorer.calculate(root, filename)
     if new_score > self.score:
       self.score = new_score
-      self.candidate = CustomMap(path=os.path.join(root, filename))
+      self.candidate = os.path.join(root, filename)
 
 def search_contents_dir(contents_root, target_url_path):
   current_match = ContentMatcher(target_url_path)
@@ -89,23 +92,25 @@ def respond_with_file(contents_root, mapping, path, full_path, logger):
 
   # Check custom mapping first
   mapped_item = search_custom_mapping(mapping, full_path)
-  if mapped_item != None and type(mapped_item.path) == str:
+  if mapped_item == None or not mapped_item.has_path():
+    # No match in custom mapping or no path is suggested in the mapping
+    # --> search the content directory
+    content_file = search_contents_dir(contents_root, path)
+    if mapped_item == None:
+      mapped_item = CustomMap(status=(404 if content_file == None else 200))
+  elif type(mapped_item.path) == str:
     # Custom mapping has a path relative to the content root
     content_file = os.path.join(contents_root, mapped_item.path)
-
-  if mapped_item == None:
-    # No match in custom mapping; search for files
-    mapped_item = search_contents_dir(contents_root, path)
-    content_file = mapped_item.path
 
   # Read a file
   body = ''
   if type(content_file) == str and os.path.isfile(content_file):
+    logger.info('> ' + full_path);
     logger.info('< ' + content_file);
     with open(content_file, 'rb') as infile:
       body = infile.read()
   else:
-    logger.info('# Unhandled: ' + full_path)
+    logger.info('! ' + full_path)
 
   # Build a response
   status_code = mapped_item.get_status_code()
