@@ -26,6 +26,15 @@ $ cd kiwi
 $ gunicorn --reload --workers 10 -b [::]:8000 kiwi.wsgi
 ```
 
+If you want to host contents over SSL:
+
+```
+$ sudo iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-ports 8000
+$ gunicorn -w10 -b [::]:8000 kiwi.wsgi\
+           --keyfile <your privatekey>\
+           --certfile <your certificate>
+```
+
 ## How to add Wininet cache
 
 1. Copy Wininet files into kiwi/contents/<your_favorite_name>/.  Wininet cache can be found in %localappdata%\Microsoft\Windows\INetCache\Low\IE (ProtectedMode) and %localappdata%\Microsoft\Windows\INetCache\IE (Non-ProtectedMode).
