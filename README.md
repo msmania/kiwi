@@ -35,6 +35,41 @@ $ gunicorn -w10 -b [::]:8000 kiwi.wsgi\
            --certfile <your certificate>
 ```
 
+## How to integrate Kiwi with Apache
+
+This supposes Kiwi's repo is `/data/src/kiwi` and Apache's htdoc directory is
+`/data/htdoc`.  Don't forget to replace them for your environment.
+
+1. Install mod_wsgi.
+```
+pip install mod_wsgi
+```
+
+2. Add for_apache.wsgi into your htdoc directory.  The directories are
+hardcoded in `for_apache.wsgi`.  Please update them accordingly.
+```
+ln -s /data/src/kiwi/kiwi/for_apache.wsgi /data/htdoc/wsgi/kiwi.wsgi
+```
+
+3. Modify httpd.conf.  Below is sample configuration to deploy Kiwi under
+`/kiwi` in daemon mode.
+```
+LoadModule wsgi_module modules/mod_wsgi.so
+...
+Define DOCROOT "/data/htdocs"
+...
+<IfModule wsgi_module>
+  WSGIScriptAlias /kiwi ${DOCROOT}/wsgi/kiwi.wsgi
+  WSGIDaemonProcess kiwi\
+                    processes=4\
+                    threads=10\
+                    home=/data/src/kiwi
+  <Location "/kiwi">
+    WSGIProcessGroup kiwi
+  </Location>
+</IfModule>
+```
+
 ## How to add Wininet cache
 
 1. Copy Wininet files into kiwi/contents/<your_favorite_name>/.  Wininet cache can be found in %localappdata%\Microsoft\Windows\INetCache\Low\IE (ProtectedMode) and %localappdata%\Microsoft\Windows\INetCache\IE (Non-ProtectedMode).
