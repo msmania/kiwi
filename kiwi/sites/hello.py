@@ -12,6 +12,10 @@ def App(app, request):
     CustomMap(hint='/go?to=japan',
               status=302,
               location='http://www.japan-guide.com/'),
+    CustomMap(hint='/CORS/hello',
+              path='b1f153f3/719e44f9/hello.json',
+              mimetype='application/json',
+              acao='*'),
   ]
   return respond_with_file(contents_root='contents/hello',
                            mapping=mapping,

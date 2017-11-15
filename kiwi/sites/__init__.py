@@ -6,12 +6,14 @@ class CustomMap:
                      path=None,
                      mimetype=None,
                      status=None,
-                     location=None):
+                     location=None,
+                     acao=None):
     self.hint = hint
     self.path = path
     self.type = mimetype
     self.status = status
     self.location = location
+    self.acao = acao
 
   def has_path(self):
     return type(self.path) == str
@@ -21,6 +23,9 @@ class CustomMap:
 
   def has_location(self):
     return type(self.location) == str
+
+  def has_security_settings(self):
+    return type(self.acao) == str
 
   def get_status_code(self):
     return self.status if type(self.status) == int else 200
@@ -127,5 +132,7 @@ def respond_with_file(contents_root, mapping, path, full_path, logger):
                                            else 'text/html'
   if mapped_item.has_location():
     headers['Location'] = mapped_item.location
+  if mapped_item.has_security_settings():
+    headers['Access-Control-Allow-Origin'] = mapped_item.acao
 
   return (body, status_code, headers)

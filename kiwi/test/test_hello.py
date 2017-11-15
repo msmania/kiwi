@@ -64,3 +64,10 @@ def test_302_redirection(client):
   assert(resp.status_code == 302)
   assert(resp.headers['Location'] == 'http://www.japan-guide.com/')
   assert(resp.data == b'<html><body>302dayo</body></html>')
+
+def test_CORS_headers(client):
+  resp = client.get('/hello/CORS/hello')
+  assert(resp.status_code == 200)
+  assert(resp.content_type == 'application/json')
+  assert(resp.data == b'hello.json\n')
+  assert(resp.headers['Access-Control-Allow-Origin'] == '*')
