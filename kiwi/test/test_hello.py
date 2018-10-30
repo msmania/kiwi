@@ -71,3 +71,13 @@ def test_CORS_headers(client):
   assert(resp.content_type == 'application/json')
   assert(resp.data == b'hello.json\n')
   assert(resp.headers['Access-Control-Allow-Origin'] == '*')
+
+def test_POST(client):
+  resp = client.post('/hello/get', data=b'1')
+  assert(resp.status_code == 200)
+  assert(resp.data == b'{"d":1}\n')
+  resp = client.post('/hello/get', data=b'2')
+  assert(resp.status_code == 200)
+  assert(resp.data == b'{"d":2}\n')
+  resp = client.post('/hello/get', data=b'3')
+  assert(resp.status_code == 404)

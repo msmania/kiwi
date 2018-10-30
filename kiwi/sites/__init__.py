@@ -7,13 +7,15 @@ class CustomMap:
                      mimetype=None,
                      status=None,
                      location=None,
-                     acao=None):
+                     acao=None,
+                     examine=None):
     self.hint = hint
     self.path = path
     self.type = mimetype
     self.status = status
     self.location = location
     self.acao = acao
+    self.examine = examine
 
   def has_path(self):
     return type(self.path) == str
@@ -29,6 +31,9 @@ class CustomMap:
 
   def get_status_code(self):
     return self.status if type(self.status) == int else 200
+
+  def examine_data(self, data):
+    return True if self.examine is None else self.examine(data)
 
 class ContentMatcher:
   class FileScorer:
@@ -86,17 +91,19 @@ def search_contents_dir(contents_root, target_url_path):
       current_match.put_candidate(root, filename)
   return current_match.candidate
 
-def search_custom_mapping(mapping, path):
+def search_custom_mapping(mapping, request):
   for m in mapping:
-    if m.hint in path:
+    if m.hint in request.full_path and m.examine_data(request.data):
       return m
   return None
 
-def respond_with_file(contents_root, mapping, path, full_path, logger):
+def respond_with_file(contents_root, mapping, request, logger):
+  path = request.path
+  full_path = request.full_path
   content_file = None
 
   # Check custom mapping first
-  mapped_item = search_custom_mapping(mapping, full_path)
+  mapped_item = search_custom_mapping(mapping, request)
   if mapped_item == None or not mapped_item.has_path():
     # No match in custom mapping or no path is suggested in the mapping
     # --> search the content directory

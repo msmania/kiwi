@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="x-ua-compatible" content="IE=edge" />
+<style type='text/css'>
+  textarea {width:300px;height:100px}
+</style>
+</head>
+<body>
+Request: <input id="q" type="text" value="" />
+<button onclick="post()">Post</button><br />
+Response:<br /><textarea id="r"></textarea>
+<script>
+'use strict';
+function post() {
+  const xhr = new XMLHttpRequest();
+  xhr.onload = function () {
+    document.getElementById('r').value = this.responseText;
+  };
+  xhr.open('POST', "./get");
+  xhr.setRequestHeader('Content-type', 'application/json');
+  xhr.send(document.getElementById('q').value);
+}
+</script>
+</body>
+</html>

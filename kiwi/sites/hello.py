@@ -16,9 +16,16 @@ def App(app, request):
               path='b1f153f3/719e44f9/hello.json',
               mimetype='application/json',
               acao='*'),
+    CustomMap(hint='/get',
+              mimetype='application/json',
+              path='json1',
+              examine=lambda x: b'1' in x),
+    CustomMap(hint='/get',
+              mimetype='application/json',
+              path='json2',
+              examine=lambda x: b'2' in x),
   ]
   return respond_with_file(contents_root='contents/hello',
                            mapping=mapping,
-                           path=request.path,
-                           full_path=request.full_path,
+                           request=request,
                            logger=app.logger)
