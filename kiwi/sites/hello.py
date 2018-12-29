@@ -24,6 +24,9 @@ def App(app, request):
               mimetype='application/json',
               path='json2',
               examine=lambda x: b'2' in x),
+    CustomMap(hint='/custom',
+              mimetype='text/plain',
+              handler=lambda req: bytes(req.full_path, encoding='utf-8')),
   ]
   return respond_with_file(contents_root='contents/hello',
                            mapping=mapping,

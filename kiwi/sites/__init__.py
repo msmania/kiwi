@@ -8,7 +8,8 @@ class CustomMap:
                      status=None,
                      location=None,
                      acao=None,
-                     examine=None):
+                     examine=None,
+                     handler=None):
     self.hint = hint
     self.path = path
     self.type = mimetype
@@ -16,9 +17,16 @@ class CustomMap:
     self.location = location
     self.acao = acao
     self.examine = examine
+    self.handler = handler
 
-  def has_path(self):
-    return type(self.path) == str
+  def use_handler(self):
+    return self.handler != None
+
+  def use_custom_map(self):
+    return not self.use_handler() and type(self.path) != str
+
+  def use_path(self):
+    return not self.use_handler() and type(self.path) == str
 
   def has_type(self):
     return type(self.type) == str
@@ -101,33 +109,35 @@ def respond_with_file(contents_root, mapping, request, logger):
   path = request.path
   full_path = request.full_path
   content_file = None
+  body = ''
 
   # Check custom mapping first
   mapped_item = search_custom_mapping(mapping, request)
-  if mapped_item == None or not mapped_item.has_path():
+  if mapped_item == None or mapped_item.use_custom_map():
     # No match in custom mapping or no path is suggested in the mapping
     # --> search the content directory
     content_file = search_contents_dir(contents_root, path)
     if mapped_item == None:
       mapped_item = CustomMap(status=(404 if content_file == None else 200))
-  elif type(mapped_item.path) == str:
+  elif mapped_item.use_handler():
+    body = mapped_item.handler(request)
+  elif mapped_item.use_path():
     # Custom mapping has a path relative to the content root
     content_file = os.path.join(contents_root, mapped_item.path)
 
-  # Read a file
-  body = ''
-  if type(content_file) == str and os.path.isfile(content_file):
-    logger.info('> ' + full_path);
-    logger.info('< ' + content_file);
-    with open(content_file, 'rb') as infile:
-      body = infile.read()
-  else:
-    logger.info('! ' + full_path)
-
-  # Build a response
   status_code = mapped_item.get_status_code()
-  if status_code != 200:
-    body = '<html><body>%idayo</body></html>' % status_code
+
+  # Respect data returned from a custom handler, otherwise read a file
+  if len(body) == 0:
+    if type(content_file) == str and os.path.isfile(content_file):
+      logger.info('> ' + full_path);
+      logger.info('< ' + content_file);
+      with open(content_file, 'rb') as infile:
+        body = infile.read()
+    else:
+      logger.info('! ' + full_path)
+    if status_code != 200:
+      body = '<html><body>%idayo</body></html>' % status_code
 
   headers = {}
   headers['Server'] = 'KiwiServer'

@@ -81,3 +81,13 @@ def test_POST(client):
   assert(resp.data == b'{"d":2}\n')
   resp = client.post('/hello/get', data=b'3')
   assert(resp.status_code == 404)
+
+def test_Handler(client):
+  resp = client.get('/hello/custom')
+  assert(resp.status_code == 200)
+  assert(resp.content_type == 'text/plain')
+  assert(resp.data == b'/hello/custom?')
+  resp = client.get('/hello/custom?q=xxx')
+  assert(resp.status_code == 200)
+  assert(resp.content_type == 'text/plain')
+  assert(resp.data == b'/hello/custom?q=xxx')
